@@ -18,3 +18,18 @@ export const createGqlResponseSchema = {
     },
   ),
 };
+
+// export const getAllResourcesSchema = new GraphQLSchema({
+//   query: new GraphQLObjectType({
+//     name: 'getAllResourcesSchema',
+//     fields: {
+//       memberTypes: {
+//         type: new GraphQLList(MemberTypeType),
+//         resolve: () => resolvers.memberTypes(prisma),
+//       },
+//       posts: { type: new GraphQLList(PostType), resolve: resolvers.posts },
+//       users: { type: new GraphQLList(UserType), resolve: resolvers.users },
+//       profiles: { type: new GraphQLList(ProfileType), resolve: resolvers.profiles },
+//     },
+//   }),
+// });
