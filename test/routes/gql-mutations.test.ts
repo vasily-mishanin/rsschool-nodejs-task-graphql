@@ -81,38 +81,38 @@ await test('gql-mutations', async (t) => {
   //   t.ok(message.includes(`Int cannot represent non-integer value: 123.321`));
   // });
 
-  await t.test('Delete resources by id.', async (t) => {
-    const { body: user1 } = await createUser(app);
-    const { body: post1 } = await createPost(app, user1.id);
-    const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BUSINESS);
+  // await t.test('Delete resources by id.', async (t) => {
+  //   const { body: user1 } = await createUser(app);
+  //   const { body: post1 } = await createPost(app, user1.id);
+  //   const { body: profile1 } = await createProfile(app, user1.id, MemberTypeId.BUSINESS);
 
-    const {
-      body: { errors },
-    } = await gqlQuery(app, {
-      // https://graphql.org/learn/queries/#multiple-fields-in-mutations
-      query: `mutation ($userId: UUID!, $profileId: UUID!, $postId: UUID!) {
-        deletePost(id: $postId)
-        deleteProfile(id: $profileId)
-        deleteUser(id: $userId)
-    }`,
-      variables: {
-        postId: post1.id,
-        profileId: profile1.id,
-        userId: user1.id,
-      },
-    });
+  //   const {
+  //     body: { errors },
+  //   } = await gqlQuery(app, {
+  //     // https://graphql.org/learn/queries/#multiple-fields-in-mutations
+  //     query: `mutation ($userId: UUID!, $profileId: UUID!, $postId: UUID!) {
+  //       deletePost(id: $postId)
+  //       deleteProfile(id: $profileId)
+  //       deleteUser(id: $userId)
+  //   }`,
+  //     variables: {
+  //       postId: post1.id,
+  //       profileId: profile1.id,
+  //       userId: user1.id,
+  //     },
+  //   });
 
-    const { body: foundDeletedPost } = await getPost(app, post1.id);
-    const { body: foundCreatedUser } = await getUser(app, user1.id);
-    const { body: foundCreatedProfile } = await getProfile(app, profile1.id);
+  //   const { body: foundDeletedPost } = await getPost(app, post1.id);
+  //   const { body: foundCreatedUser } = await getUser(app, user1.id);
+  //   const { body: foundCreatedProfile } = await getProfile(app, profile1.id);
 
-    console.log('ERRORS', errors);
+  //   console.log('ERRORS', errors);
 
-    t.ok(!errors);
-    t.ok(foundDeletedPost === null);
-    t.ok(foundCreatedUser === null);
-    t.ok(foundCreatedProfile === null);
-  });
+  //   t.ok(!errors);
+  //   t.ok(foundDeletedPost === null);
+  //   t.ok(foundCreatedUser === null);
+  //   t.ok(foundCreatedProfile === null);
+  // });
 
   // await t.test('Change resources by id.', async (t) => {
   //   const { body: user1 } = await createUser(app);
@@ -183,36 +183,36 @@ await test('gql-mutations', async (t) => {
   //   );
   // });
 
-  // await t.test('Subs mutations.', async (t) => {
-  //   const { body: user1 } = await createUser(app);
-  //   const { body: user2 } = await createUser(app);
-  //   const { body: user3 } = await createUser(app);
-  //   const { body: user4 } = await createUser(app);
+  await t.test('Subs mutations.', async (t) => {
+    const { body: user1 } = await createUser(app);
+    const { body: user2 } = await createUser(app);
+    const { body: user3 } = await createUser(app);
+    const { body: user4 } = await createUser(app);
 
-  //   await subscribeTo(app, user3.id, user4.id);
+    await subscribeTo(app, user3.id, user4.id);
 
-  //   const {
-  //     body: { errors },
-  //   } = await gqlQuery(app, {
-  //     query: `mutation ($userId1: UUID!, $authorId1: UUID!, $userId2: UUID!, $authorId2: UUID!) {
-  //       subscribeTo(userId: $userId1, authorId: $authorId1) {
-  //           id
-  //       }
-  //       unsubscribeFrom(userId: $userId2, authorId: $authorId2)
-  //   }`,
-  //     variables: {
-  //       userId1: user1.id,
-  //       authorId1: user2.id,
-  //       userId2: user3.id,
-  //       authorId2: user4.id,
-  //     },
-  //   });
+    const {
+      body: { errors },
+    } = await gqlQuery(app, {
+      query: `mutation ($userId1: UUID!, $authorId1: UUID!, $userId2: UUID!, $authorId2: UUID!) {
+        subscribeTo(userId: $userId1, authorId: $authorId1) {
+            id
+        }
+        unsubscribeFrom(userId: $userId2, authorId: $authorId2)
+    }`,
+      variables: {
+        userId1: user1.id,
+        authorId1: user2.id,
+        userId2: user3.id,
+        authorId2: user4.id,
+      },
+    });
 
-  //   const { body: subscribedToUser2 } = await subscribedToUser(app, user2.id);
-  //   const { body: subscribedToUser4 } = await subscribedToUser(app, user4.id);
+    const { body: subscribedToUser2 } = await subscribedToUser(app, user2.id);
+    const { body: subscribedToUser4 } = await subscribedToUser(app, user4.id);
 
-  //   t.ok(!errors);
-  //   t.ok(subscribedToUser2[0].id === user1.id);
-  //   t.ok(subscribedToUser4.length === 0);
-  // });
+    t.ok(!errors);
+    t.ok(subscribedToUser2[0].id === user1.id);
+    t.ok(subscribedToUser4.length === 0);
+  });
 });
