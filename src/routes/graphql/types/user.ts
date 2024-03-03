@@ -1,5 +1,6 @@
 import {
   GraphQLFloat,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
@@ -19,5 +20,13 @@ export const UserType = new GraphQLObjectType({
     posts: { type: new GraphQLList(PostType) },
     userSubscribedTo: { type: new GraphQLList(UserType) },
     subscribedToUser: { type: new GraphQLList(UserType) },
+  }),
+});
+
+export const CreateUserInput = new GraphQLInputObjectType({
+  name: 'CreateUserInput',
+  fields: () => ({
+    name: { type: GraphQLString },
+    balance: { type: GraphQLFloat },
   }),
 });
