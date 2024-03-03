@@ -6,7 +6,7 @@ import {
   ProfileType,
 } from '../types/profile.js';
 import { ChangeUserInputType, CreateUserInputType, UserType } from '../types/user.js';
-import { GraphQLBoolean, GraphQLObjectType, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { UUIDType } from '../types/uuid.js';
 
 export const resourcesMutation = (prisma: PrismaClient) => {
@@ -123,6 +123,48 @@ export const resourcesMutation = (prisma: PrismaClient) => {
             where: { id: args.id },
             data: args.dto,
           });
+        },
+      },
+
+      subscribeTo: {
+        type: UserType,
+        args: {
+          userId: { type: UUIDType },
+          authorId: { type: UUIDType },
+        },
+        resolve: async (_, args) => {
+          await prisma.user.update({
+            where: {
+              id: args.userId,
+            },
+            data: {
+              userSubscribedTo: {
+                create: {
+                  authorId: args.authorId,
+                },
+              },
+            },
+          });
+        },
+      },
+
+      unsubscribeFrom: {
+        type: GraphQLBoolean,
+        args: {
+          userId: { type: UUIDType },
+          authorId: { type: UUIDType },
+        },
+        resolve: async (_, args) => {
+          const unsubscribed = await prisma.subscribersOnAuthors.delete({
+            where: {
+              subscriberId_authorId: {
+                subscriberId: args.userId,
+                authorId: args.authorId,
+              },
+            },
+          });
+
+          return unsubscribed ? true : false;
         },
       },
     },
