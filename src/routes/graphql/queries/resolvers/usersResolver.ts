@@ -13,27 +13,38 @@ export const usersResolver = async (
   const profileBatch = users.map(async (user) => await profileLoader.load(user.id));
   const postsBatch = users.map(async (user) => await postsLoader.load(user.id));
 
-  const profiles = (await Promise.all(profileBatch)).filter((profile) => profile);
+  const profiles = await Promise.all(profileBatch);
+  const posts = await Promise.all(postsBatch);
 
   const profilesWithMemberType = profiles.map((profile) => {
+    if (!profile) {
+      return null;
+    }
     let memberType: { id: string } | undefined;
     memberType = memberTypes.find((mt) => mt.id === profile.memberTypeId);
     return { ...profile, memberType: { id: memberType?.id } };
   });
 
-  const posts = await Promise.all(postsBatch);
+  console.log({ memberTypes });
+  console.log({ users });
+  console.log({ posts });
+  console.log({ profilesWithMemberType });
 
   const subscriptions = await prisma.subscribersOnAuthors.findMany();
 
-  return users.map((user, index) => {
+  const usersResult = users.map((user, index) => {
     const userSubscribedTo = subscriptions.filter((s) => s.subscriberId === user.id);
     const subscribedToUser = subscriptions.filter((s) => s.authorId === user.id);
     return {
       ...user,
-      userSubscribedTo,
-      subscribedToUser,
       profile: profilesWithMemberType[index],
       posts: posts[index],
+      userSubscribedTo,
+      subscribedToUser,
     };
   });
+
+  console.log('USERS RESULT', usersResult);
+
+  return usersResult;
 };
