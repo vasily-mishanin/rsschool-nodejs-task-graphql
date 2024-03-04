@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { Post, PrismaClient, Profile } from '@prisma/client';
 import { GraphQLList, GraphQLObjectType, validate } from 'graphql';
 import { MemberTypeIdEnum, MemberTypeType } from '../types/member-type.js';
 import { PostType } from '../types/post.js';
@@ -13,8 +13,13 @@ import { profileResolver } from './resolvers/profileResolver.js';
 import { profilesResolver } from './resolvers/profilesResolver.js';
 import { userResolver } from './resolvers/userResolver.js';
 import { usersResolver } from './resolvers/usersResolver.js';
+import DataLoader from 'dataloader';
 
-export const resourcesQuery = (prisma: PrismaClient) => {
+export const resourcesQuery = (
+  prisma: PrismaClient,
+  profileLoader: DataLoader<string, Profile, string>,
+  postsLoader: DataLoader<string, Post[], string>,
+) => {
   return new GraphQLObjectType({
     name: 'Query',
     fields: {
@@ -30,7 +35,7 @@ export const resourcesQuery = (prisma: PrismaClient) => {
 
       users: {
         type: new GraphQLList(UserType),
-        resolve: async () => usersResolver(prisma),
+        resolve: async () => usersResolver(prisma, profileLoader, postsLoader),
       },
 
       profiles: {

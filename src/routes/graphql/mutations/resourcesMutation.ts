@@ -8,6 +8,7 @@ import {
 import { ChangeUserInputType, CreateUserInputType, UserType } from '../types/user.js';
 import { GraphQLBoolean, GraphQLObjectType, GraphQLSchema, GraphQLString } from 'graphql';
 import { UUIDType } from '../types/uuid.js';
+import DataLoader from 'dataloader';
 
 export const resourcesMutation = (prisma: PrismaClient) => {
   return new GraphQLObjectType({
