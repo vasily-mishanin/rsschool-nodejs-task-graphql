@@ -58,10 +58,7 @@ await test('gql-loader', async (t) => {
       body: { operationHistory: afterHistory },
     } = await getPrismaStats(app);
 
-    console.log('TEST', errors);
-
     t.ok(!errors);
-    console.log('TEST <=6', afterHistory.length - beforeHistory.length);
     t.ok(afterHistory.length - beforeHistory.length <= 6);
 
     const history = afterHistory.slice(beforeHistory.length);
@@ -71,9 +68,8 @@ await test('gql-loader', async (t) => {
     const foundMemberTypeCall = history.find(
       ({ model, operation }) => model === 'MemberType' && operation === 'findMany',
     );
-    console.log('TEST foundPostCall', foundPostCall);
+
     t.ok(foundPostCall);
-    console.log('TEST foundMemberTypeCall', foundMemberTypeCall);
     t.ok(foundMemberTypeCall);
   });
 
@@ -97,7 +93,7 @@ await test('gql-loader', async (t) => {
     await unsubscribeFrom(app, user1.id, user2.id);
 
     const {
-      body: { data, errors },
+      body: { data },
     } = await gqlQuery(app, {
       query: `query {
         users {
@@ -109,10 +105,7 @@ await test('gql-loader', async (t) => {
       }`,
     });
 
-    console.log('ERRORS', errors);
     const foundUser1 = data.users.find(({ id }) => id === user1.id);
-
-    console.log('FOUND USER-1', foundUser1);
 
     t.ok(foundUser1.userSubscribedTo.length === 0);
   });

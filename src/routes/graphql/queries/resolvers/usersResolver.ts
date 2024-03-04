@@ -1,50 +1,46 @@
-import { Post, PrismaClient, Profile } from '@prisma/client';
+import { Post, PrismaClient, Profile, User } from '@prisma/client';
 import DataLoader from 'dataloader';
+
+const userOriginalFields = ['id', 'name', 'balance'];
 
 export const usersResolver = async (
   prisma: PrismaClient,
   profileLoader: DataLoader<string, Profile, string>,
   postsLoader: DataLoader<string, Post[], string>,
+  fields: Record<string, any>,
 ) => {
-  const users = await prisma.user.findMany();
-  const memberTypes = await prisma.memberType.findMany();
+  const fieldsKeys = Object.keys(fields);
+  console.log({ fieldsKeys });
 
-  // Batch load profiles and posts using DataLoader
-  const profileBatch = users.map(async (user) => await profileLoader.load(user.id));
-  const postsBatch = users.map(async (user) => await postsLoader.load(user.id));
+  const neededFields = Object.fromEntries(
+    fieldsKeys
+      .filter((field) => !userOriginalFields.includes(field))
+      .map((field) => [field, true]),
+  );
 
-  const profiles = await Promise.all(profileBatch);
-  const posts = await Promise.all(postsBatch);
-
-  const profilesWithMemberType = profiles.map((profile) => {
-    if (!profile) {
-      return null;
-    }
-    let memberType: { id: string } | undefined;
-    memberType = memberTypes.find((mt) => mt.id === profile.memberTypeId);
-    return { ...profile, memberType: { id: memberType?.id } };
+  let users = await prisma.user.findMany({
+    include: neededFields,
   });
 
-  console.log({ memberTypes });
-  console.log({ users });
-  console.log({ posts });
-  console.log({ profilesWithMemberType });
+  if (fieldsKeys.includes('posts') && fieldsKeys.includes('profile')) {
+    const profileBatch = users.map(async (user) => await profileLoader.load(user.id));
+    const postsBatch = users.map(async (user) => await postsLoader.load(user.id));
 
-  const subscriptions = await prisma.subscribersOnAuthors.findMany();
+    const profiles = await Promise.all(profileBatch);
+    const posts = await Promise.all(postsBatch);
 
-  const usersResult = users.map((user, index) => {
-    const userSubscribedTo = subscriptions.filter((s) => s.subscriberId === user.id);
-    const subscribedToUser = subscriptions.filter((s) => s.authorId === user.id);
-    return {
-      ...user,
-      profile: profilesWithMemberType[index],
-      posts: posts[index],
-      userSubscribedTo,
-      subscribedToUser,
-    };
-  });
+    const memberTypes = await prisma.memberType.findMany();
 
-  console.log('USERS RESULT', usersResult);
+    const usersResult = users.map((user, index) => {
+      return {
+        ...user,
+        profile: profiles[index],
+      };
+    });
 
-  return usersResult;
+    console.log('USERS RESULT', usersResult);
+    return usersResult;
+  } else {
+    return users;
+  }
 };

@@ -10,6 +10,7 @@ export const profileLoader = (prisma: PrismaClient) =>
       where: {
         userId: { in: userIdsMutable },
       },
+      include: { memberType: true },
     });
 
     // Map profiles by userId

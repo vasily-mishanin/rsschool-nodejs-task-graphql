@@ -169,7 +169,7 @@ await test('gql-queries', async (t) => {
       },
     });
     const {
-      body: { data: dataUsers, errors },
+      body: { data: dataUsers },
     } = await gqlQuery(app, {
       query: `query {
           users {
@@ -186,9 +186,6 @@ await test('gql-queries', async (t) => {
           }
       }`,
     });
-
-    console.log('TEST -- dataUsers', dataUsers);
-    console.log('TEST -- dataUsers -- ERRORS', errors);
 
     t.ok(dataUser.user.id === user1.id);
     t.ok(dataUser.user.profile.id === profile1.id);
